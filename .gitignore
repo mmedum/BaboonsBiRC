@@ -58,6 +58,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Rope project
+*.ropeproject
+
 # C extensions
 *.so
 
