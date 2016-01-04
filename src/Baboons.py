@@ -11,15 +11,21 @@ def is_valid_file(parser, file):
         return file
 
 
-def accumulate_poly(baboon1, baboon2, baboon3, poly1, poly2, poly3):
-    print("Hellow", baboon1)
+def accumulate_poly(baboon1, baboon2, baboon3, poly1, poly2, poly3,
+                    poly1And2, poly1And3, poly2And3):
     if baboon1 == 2:
         poly1 += 1
     if baboon2 == 2:
         poly2 += 1
     if baboon3 == 2:
         poly3 += 1
-    return poly1, poly2, poly3
+    if baboon1 == 2 and baboon2 == 2:
+        poly1And2 += 1
+    if baboon1 == 2 and baboon2 == 2:
+        poly1And3 += 1
+    if baboon2 == 2 and baboon3 == 2:
+        poly2And3 += 1
+    return poly1, poly2, poly3, poly1And2, poly1And3, poly2And3
 
 
 def accumulate_state(baboon1, baboon2, baboon3, stateA, stateB, stateC):
@@ -38,8 +44,8 @@ def main():
     parser.add_argument("-file", dest="filename", required=True,
                         help="Input file with baboon data", metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-slice", dest="slice", required=True,
-                        help="Number of lines to look at",
+    parser.add_argument("-s", dest="slice", required=True, nargs=2,
+                        help="Number of lines to look at, start - finish",
                         metavar="SLICE", type=int)
     parser.add_argument("-b", dest="baboons", required=True, nargs=3,
                         help="Input selected baboon species",
@@ -47,32 +53,40 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
+    # Slice
+    start = args.slice[0]
+    finish = args.slice[1]
+
     # Save the three input species
     baboon1 = args.baboons[0]
     baboon2 = args.baboons[1]
     baboon3 = args.baboons[2]
 
     # State variables
+    # states A(011), B(101), C(110)
     nrOfStateA = 0
     nrOfstateB = 0
     nrOfstateC = 0
 
-    nrOfPolyArg1 = 0
-    nrOfPolyArg2 = 0
-    nrOfPolyArg3 = 0
+    # Polymorph types
+    nrOfPolyType1 = 0
+    nrOfPolyType2 = 0
+    nrOfPolyType3 = 0
+    nrOfPolyType1And2 = 0
+    nrOfPolyType1And3 = 0
+    nrOfPolyType2And3 = 0
 
     # Create dictionary reader
-    # Setup variables
-    # states A(011), B(101), C(110)
+    # Perform calculations
     with open(args.filename) as patterns:
         reader = csv.DictReader(patterns, delimiter="\t")
-        for row in islice(reader, 0, args.slice):
+        for row in islice(reader, start, finish):
             # ref = row["ref"]
             # alt = row["alt"]
 
-            currentBaboon1 = row[baboon1]
-            currentBaboon2 = row[baboon2]
-            currentBaboon3 = row[baboon3]
+            currentBaboon1 = int(row[baboon1])
+            currentBaboon2 = int(row[baboon2])
+            currentBaboon3 = int(row[baboon3])
 
             print(currentBaboon1, currentBaboon2, currentBaboon3)
 
@@ -80,11 +94,17 @@ def main():
                 currentBaboon1, currentBaboon2, currentBaboon3,
                 nrOfStateA, nrOfstateB, nrOfstateC)
 
-            nrOfPolyArg1, nrOfPolyArg2, nrOfPolyArg3 = accumulate_poly(
+            nrOfPolyType1, nrOfPolyType2, nrOfPolyType3, nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3 = accumulate_poly(
                 currentBaboon1, currentBaboon2, currentBaboon3,
-                nrOfPolyArg1, nrOfPolyArg2, nrOfPolyArg3)
+                nrOfPolyType1, nrOfPolyType2, nrOfPolyType3,
+                nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3)
 
-    output = "#StateA: {}, #StateB: {}, #StateC: {} \n #PolyArg1: {}, #PolyArg2: {}, #PolyArg3: {}".format(nrOfStateA, nrOfstateB, nrOfstateC, nrOfPolyArg1, nrOfPolyArg2, nrOfPolyArg3)
+    output = ("#StateA: {}, #StateB: {}, #StateC: {}"
+              "\n#PolyType1: {}, #PolyType2: {}, #PolyType3: {}"
+              "\n#PolyType1And2: {}, #PolyType1And3: {}, #PolyType2And3: {}").format(
+        nrOfStateA, nrOfstateB, nrOfstateC,
+        nrOfPolyType1, nrOfPolyType2, nrOfPolyType3,
+        nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3)
     print(output)
 
 if __name__ == "__main__":
