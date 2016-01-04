@@ -1,5 +1,5 @@
 # BaboonsBiRC
-Python code developed for Bioinformatics Research Center, Aarhus University
+Python code developed for Bioinformatics Research Centre, Aarhus University
 
 ## To run the code ##
 
