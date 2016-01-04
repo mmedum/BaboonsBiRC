@@ -11,32 +11,55 @@ def is_valid_file(parser, file):
         return file
 
 
-def accumulate_poly(baboon1, baboon2, baboon3, poly1, poly2, poly3,
-                    poly1And2, poly1And3, poly2And3):
+def accumulatePoly(baboon1, baboon2, baboon3, values):
     if baboon1 == 2:
-        poly1 += 1
+        values["nrOfPolyType1"] += 1
     if baboon2 == 2:
-        poly2 += 1
+        values["nrOfPolyType2"] += 1
     if baboon3 == 2:
-        poly3 += 1
+        values["nrOfPolyType3"] += 1
     if baboon1 == 2 and baboon2 == 2:
-        poly1And2 += 1
+        values["nrOfPolyType1And2"] += 1
     if baboon1 == 2 and baboon2 == 2:
-        poly1And3 += 1
+        values["nrOfPolyType1And3"] += 1
     if baboon2 == 2 and baboon3 == 2:
-        poly2And3 += 1
-    return poly1, poly2, poly3, poly1And2, poly1And3, poly2And3
+        values["nrOfPolyType2And3"] += 1
 
 
-def accumulate_state(baboon1, baboon2, baboon3, stateA, stateB, stateC):
+def accumulateState(baboon1, baboon2, baboon3, values):
     if baboon1 == 0 and baboon2 == 1 and baboon3 == 1:
-        stateA += 1
+        values["nrOfStateA"] += 1
     elif baboon1 == 1 and baboon2 == 0 and baboon3 == 1:
-        stateB += 1
+        values["nrOfStateB"] += 1
     elif baboon1 == 1 and baboon2 == 1 and baboon3 == 0:
-        stateC += 1
-    return stateA, stateB, stateC
+        values["nrOfStateC"] += 1
 
+
+def setupValues(values):
+    # State variables
+    # states A(011), B(101), C(110)
+    values["nrOfStateA"] = 0
+    values["nrOfStateB"] = 0
+    values["nrOfStateC"] = 0
+
+    # State changed variables
+    values["stateAToA"] = 0
+    values["stateBToB"] = 0
+    values["stateCToC"] = 0
+    values["stateAToB"] = 0
+    values["stateAToC"] = 0
+    values["stateBToA"] = 0
+    values["stateBToC"] = 0
+    values["stateCToA"] = 0
+    values["stateCToB"] = 0
+
+    # Polymorph types
+    values["nrOfPolyType1"] = 0
+    values["nrOfPolyType2"] = 0
+    values["nrOfPolyType3"] = 0
+    values["nrOfPolyType1And2"] = 0
+    values["nrOfPolyType1And3"] = 0
+    values["nrOfPolyType2And3"] = 0
 
 def main():
     # Set arguments for the program
@@ -62,27 +85,14 @@ def main():
     baboon2 = args.baboons[1]
     baboon3 = args.baboons[2]
 
-    # State variables
-    # states A(011), B(101), C(110)
-    nrOfStateA = 0
-    nrOfstateB = 0
-    nrOfstateC = 0
-
-    # Polymorph types
-    nrOfPolyType1 = 0
-    nrOfPolyType2 = 0
-    nrOfPolyType3 = 0
-    nrOfPolyType1And2 = 0
-    nrOfPolyType1And3 = 0
-    nrOfPolyType2And3 = 0
+    values = {}
+    setupValues(values)
 
     # Create dictionary reader
     # Perform calculations
     with open(args.filename) as patterns:
         reader = csv.DictReader(patterns, delimiter="\t")
         for row in islice(reader, start, finish):
-            # ref = row["ref"]
-            # alt = row["alt"]
 
             currentBaboon1 = int(row[baboon1])
             currentBaboon2 = int(row[baboon2])
@@ -90,21 +100,19 @@ def main():
 
             print(currentBaboon1, currentBaboon2, currentBaboon3)
 
-            nrOfStateA, nrOfstateB, nrOfstateC = accumulate_state(
-                currentBaboon1, currentBaboon2, currentBaboon3,
-                nrOfStateA, nrOfstateB, nrOfstateC)
+            accumulateState(currentBaboon1, currentBaboon2,
+                            currentBaboon3, values)
 
-            nrOfPolyType1, nrOfPolyType2, nrOfPolyType3, nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3 = accumulate_poly(
-                currentBaboon1, currentBaboon2, currentBaboon3,
-                nrOfPolyType1, nrOfPolyType2, nrOfPolyType3,
-                nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3)
+            accumulatePoly(currentBaboon1, currentBaboon2,
+                           currentBaboon3, values)
 
     output = ("#StateA: {}, #StateB: {}, #StateC: {}"
               "\n#PolyType1: {}, #PolyType2: {}, #PolyType3: {}"
               "\n#PolyType1And2: {}, #PolyType1And3: {}, #PolyType2And3: {}").format(
-        nrOfStateA, nrOfstateB, nrOfstateC,
-        nrOfPolyType1, nrOfPolyType2, nrOfPolyType3,
-        nrOfPolyType1And2, nrOfPolyType1And3, nrOfPolyType2And3)
+                  values["nrOfStateA"], values["nrOfStateB"], values["nrOfStateC"],
+                  values["nrOfPolyType1"], values["nrOfPolyType2"],
+                  values["nrOfPolyType3"], values["nrOfPolyType1And2"],
+                  values["nrOfPolyType1And3"], values["nrOfPolyType2And3"])
     print(output)
 
 if __name__ == "__main__":
