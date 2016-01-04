@@ -61,6 +61,7 @@ def setupValues(values):
     values["nrOfPolyType1And3"] = 0
     values["nrOfPolyType2And3"] = 0
 
+
 def main():
     # Set arguments for the program
     parser = ArgumentParser(description="Argument parser for baboons.")
@@ -85,27 +86,44 @@ def main():
     baboon2 = args.baboons[1]
     baboon3 = args.baboons[2]
 
-    values = {}
-    setupValues(values)
+    # Current Chromosome, assumming starting with 1
+    currentChromosome = 1
+
+    # Result placed in map
+    results = {}
 
     # Create dictionary reader
     # Perform calculations
     with open(args.filename) as patterns:
         reader = csv.DictReader(patterns, delimiter="\t")
+        next(reader)  # skip fieldnames
+
+        # Setup map for keep intermidiate results
+        values = {}
+        setupValues(values)
+
         for row in islice(reader, start, finish):
+            if int(row["Chromosome"]) != currentChromosome:
+                # Save everything about the current Chromosome
+                results[currentChromosome] = values.items()
+                values.clear()
+                setupValues(values)
+                currentChromosome = int(row["Chromosome"])
+            else:
+                currentBaboon1 = int(row[baboon1])
+                currentBaboon2 = int(row[baboon2])
+                currentBaboon3 = int(row[baboon3])
 
-            currentBaboon1 = int(row[baboon1])
-            currentBaboon2 = int(row[baboon2])
-            currentBaboon3 = int(row[baboon3])
+                # print(currentBaboon1, currentBaboon2, currentBaboon3)
 
-            print(currentBaboon1, currentBaboon2, currentBaboon3)
+                accumulateState(currentBaboon1, currentBaboon2,
+                                currentBaboon3, values)
 
-            accumulateState(currentBaboon1, currentBaboon2,
-                            currentBaboon3, values)
+                accumulatePoly(currentBaboon1, currentBaboon2,
+                               currentBaboon3, values)
 
-            accumulatePoly(currentBaboon1, currentBaboon2,
-                           currentBaboon3, values)
-
+    results[currentChromosome] = values.items()
+    print(results)
     output = ("#StateA: {}, #StateB: {}, #StateC: {}"
               "\n#PolyType1: {}, #PolyType2: {}, #PolyType3: {}"
               "\n#PolyType1And2: {}, #PolyType1And3: {}, #PolyType2And3: {}").format(
