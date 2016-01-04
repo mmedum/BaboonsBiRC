@@ -1,0 +1,5 @@
+- Slices should be represented for each Chromosome, so a count from start to finish based on the input parameters. We should always read the whole file
+
+- Still missing variables for state changes
+
+- Output should be a tab seperated file with headers and values for each chromosome, with a count on how many lines we saw for each chromesome 
