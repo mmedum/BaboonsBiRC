@@ -1,9 +1,4 @@
-- Windowslice should be for every line in a Chromosome and thereby output the windowsslice for each chromosome
-    - 1 all the data for that slice
-    - 1 all the data for that slice
-
 - Chromosome 1 ends at 2430092
-
 
 - Still missing variables for state changes
 
