@@ -1,5 +1,9 @@
-- Slices should be represented for each Chromosome, so a count from start to finish based on the input parameters. We should always read the whole file
+- Windowslice should be for every line in a Chromosome and thereby output the windowsslice for each chromosome
+    - 1 all the data for that slice
+    - 1 all the data for that slice
+
+- Chromosome 1 ends at 2430092
+
 
 - Still missing variables for state changes
 
-- Output should be a tab seperated file with headers and values for each chromosome, with a count on how many lines we saw for each chromesome 

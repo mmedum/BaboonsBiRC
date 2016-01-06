@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from itertools import islice
 import os.path
 import csv
 import collections
@@ -37,6 +36,7 @@ def accumulateState(baboon1, baboon2, baboon3, values):
 
 
 def setupKeys(orDict):
+    orDict.clear()
     # Number of lines read for a
     # specific Chromosome
     orDict["nrOfLines"] = 0
@@ -84,8 +84,8 @@ def main():
     parser.add_argument("-file", dest="filename", required=True,
                         help="Input file with baboon data", metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-s", dest="slice", required=True, nargs=2,
-                        help="Number of lines to look at, start - finish",
+    parser.add_argument("-s", dest="slice", required=True,
+                        help="The slice for for each Chromosome",
                         metavar="SLICE", type=int)
     parser.add_argument("-b", dest="baboons", required=True, nargs=3,
                         help="Input selected baboon species",
@@ -94,8 +94,7 @@ def main():
     args = parser.parse_args()
 
     # Slice
-    start = args.slice[0]
-    finish = args.slice[1]
+    windowSlice = args.slice
 
     # Save the three input species
     baboon1 = args.baboons[0]
@@ -123,13 +122,17 @@ def main():
             out.write(key)
             out.write("\t")
 
-        for row in islice(reader, start, finish):
+        # count variable to check for window slice
+        count = 0
+
+        for row in reader:
             orDict["nrOfLines"] += 1
-            if row["Chromosome"] != currentChromosome:
+            count += 1
+            if row["Chromosome"] != currentChromosome or count == windowSlice:
                 outputToFile(currentChromosome, orDict, out)
-                orDict.clear()
                 setupKeys(orDict)
                 currentChromosome = row["Chromosome"]
+                count = 0
             else:
                 currentBaboon1 = int(row[baboon1])
                 currentBaboon2 = int(row[baboon2])
@@ -141,7 +144,10 @@ def main():
                 accumulatePoly(currentBaboon1, currentBaboon2,
                                currentBaboon3, orDict)
 
+        # Need to last line and final chromosome
+        orDict["nrOfLines"] += 1
         outputToFile(currentChromosome, orDict, out)
+
 
 if __name__ == "__main__":
     main()
