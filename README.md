@@ -4,4 +4,4 @@ Python code developed for Bioinformatics Research Centre, Aarhus University
 ## To run the code ##
 
 ```python
-python src/Baboons.py -file path/to/file -s start finish -b type1 type2 type3
+python src/Baboons.py -file path/to/file -s 1000 -b type1 type2 type3
