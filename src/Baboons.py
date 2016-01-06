@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from itertools import islice
 import os.path
 import csv
+import collections
 
 
 def is_valid_file(parser, file):
@@ -35,31 +36,46 @@ def accumulateState(baboon1, baboon2, baboon3, values):
         values["nrOfStateC"] += 1
 
 
-def setupValues(values):
+def setupKeys(orDict):
+    # Number of lines read for a
+    # specific Chromosome
+    orDict["nrOfLines"] = 0
+
     # State variables
     # states A(011), B(101), C(110)
-    values["nrOfStateA"] = 0
-    values["nrOfStateB"] = 0
-    values["nrOfStateC"] = 0
+    orDict["nrOfStateA"] = 0
+    orDict["nrOfStateB"] = 0
+    orDict["nrOfStateC"] = 0
 
     # State changed variables
-    values["stateAToA"] = 0
-    values["stateBToB"] = 0
-    values["stateCToC"] = 0
-    values["stateAToB"] = 0
-    values["stateAToC"] = 0
-    values["stateBToA"] = 0
-    values["stateBToC"] = 0
-    values["stateCToA"] = 0
-    values["stateCToB"] = 0
+    orDict["stateAToA"] = 0
+    orDict["stateBToB"] = 0
+    orDict["stateCToC"] = 0
+    orDict["stateAToB"] = 0
+    orDict["stateAToC"] = 0
+    orDict["stateBToA"] = 0
+    orDict["stateBToC"] = 0
+    orDict["stateCToA"] = 0
+    orDict["stateCToB"] = 0
 
     # Polymorph types
-    values["nrOfPolyType1"] = 0
-    values["nrOfPolyType2"] = 0
-    values["nrOfPolyType3"] = 0
-    values["nrOfPolyType1And2"] = 0
-    values["nrOfPolyType1And3"] = 0
-    values["nrOfPolyType2And3"] = 0
+    orDict["nrOfPolyType1"] = 0
+    orDict["nrOfPolyType2"] = 0
+    orDict["nrOfPolyType3"] = 0
+    orDict["nrOfPolyType1And2"] = 0
+    orDict["nrOfPolyType1And3"] = 0
+    orDict["nrOfPolyType2And3"] = 0
+
+
+def outputToFile(currentChromosome, orDict, outFile):
+    # Output current chromosome and data
+    outFile.write("\n")
+    outFile.write(str(currentChromosome))
+    outFile.write("\t")
+
+    for value in orDict.values():
+        outFile.write(str(value))
+        outFile.write("\t")
 
 
 def main():
@@ -87,51 +103,45 @@ def main():
     baboon3 = args.baboons[2]
 
     # Current Chromosome, assumming starting with 1
-    currentChromosome = 1
-
-    # Result placed in map
-    results = {}
+    currentChromosome = "1"
 
     # Create dictionary reader
     # Perform calculations
-    with open(args.filename) as patterns:
+    with open(args.filename) as patterns, open('output.txt', 'a') as out:
         reader = csv.DictReader(patterns, delimiter="\t")
         next(reader)  # skip fieldnames
 
-        # Setup map for keep intermidiate results
-        values = {}
-        setupValues(values)
+        # Setup ordered map for holding results
+        # for each chromosome before writing
+        # them to out file
+        orDict = collections.OrderedDict()
+        setupKeys(orDict)
+
+        # Output fieldnames and tab seperate them
+        out.write("Chromosome\t")
+        for key in orDict.keys():
+            out.write(key)
+            out.write("\t")
 
         for row in islice(reader, start, finish):
-            if int(row["Chromosome"]) != currentChromosome:
-                # Save everything about the current Chromosome
-                results[currentChromosome] = values.items()
-                values.clear()
-                setupValues(values)
-                currentChromosome = int(row["Chromosome"])
+            orDict["nrOfLines"] += 1
+            if row["Chromosome"] != currentChromosome:
+                outputToFile(currentChromosome, orDict, out)
+                orDict.clear()
+                setupKeys(orDict)
+                currentChromosome = row["Chromosome"]
             else:
                 currentBaboon1 = int(row[baboon1])
                 currentBaboon2 = int(row[baboon2])
                 currentBaboon3 = int(row[baboon3])
 
-                # print(currentBaboon1, currentBaboon2, currentBaboon3)
-
                 accumulateState(currentBaboon1, currentBaboon2,
-                                currentBaboon3, values)
+                                currentBaboon3, orDict)
 
                 accumulatePoly(currentBaboon1, currentBaboon2,
-                               currentBaboon3, values)
+                               currentBaboon3, orDict)
 
-    results[currentChromosome] = values.items()
-    print(results)
-    output = ("#StateA: {}, #StateB: {}, #StateC: {}"
-              "\n#PolyType1: {}, #PolyType2: {}, #PolyType3: {}"
-              "\n#PolyType1And2: {}, #PolyType1And3: {}, #PolyType2And3: {}").format(
-                  values["nrOfStateA"], values["nrOfStateB"], values["nrOfStateC"],
-                  values["nrOfPolyType1"], values["nrOfPolyType2"],
-                  values["nrOfPolyType3"], values["nrOfPolyType1And2"],
-                  values["nrOfPolyType1And3"], values["nrOfPolyType2And3"])
-    print(output)
+        outputToFile(currentChromosome, orDict, out)
 
 if __name__ == "__main__":
     main()
