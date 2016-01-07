@@ -39,37 +39,39 @@ def accumulateState(baboon1, baboon2, baboon3, currentState, values):
     else:
         return 0, False
 
+def accumulateTypeNotZero(baboon1, baboon2, baboon3, values):
+    if (baboon1 > 0 and baboon2 == 0 and baboon3 == 0) or (baboon1 == 0 and baboon2 > 0 and baboon3 == 0) or (baboon1 == 0 and baboon2 == 0 and baboon3 > 0):
+        values["typeNotZero"] += 1
+
 
 def accumulateStateChanged(lastState, currentState, values):
-    print("CurrentState: ", currentState)
-    print("LastState: ", lastState)
     if lastState == 0:
         return currentState
-    elif lastState == 1 and currentState == 1:
+    if lastState == 1 and currentState == 1:
         values["stateAToA"] += 1
         return 1
-    elif lastState == 1 and currentState == 2:
+    if lastState == 1 and currentState == 2:
         values["stateAToB"] += 1
         return 2
-    elif lastState == 1 and currentState == 3:
+    if lastState == 1 and currentState == 3:
         values["stateAToC"] += 1
         return 3
-    elif lastState == 2 and currentState == 2:
+    if lastState == 2 and currentState == 2:
         values["stateBToB"] += 1
         return 2
-    elif lastState == 2 and currentState == 1:
+    if lastState == 2 and currentState == 1:
         values["stateBToA"] += 1
         return 1
-    elif lastState == 2 and currentState == 3:
+    if lastState == 2 and currentState == 3:
         values["stateBToC"] += 1
         return 3
-    elif lastState == 3 and currentState == 3:
+    if lastState == 3 and currentState == 3:
         values["stateCToC"] += 1
         return 3
-    elif lastState == 3 and currentState == 1:
+    if lastState == 3 and currentState == 1:
         values["stateCToA"] += 1
         return 1
-    elif lastState == 3 and currentState == 2:
+    if lastState == 3 and currentState == 2:
         values["stateCToB"] += 1
         return 2
 
@@ -78,7 +80,9 @@ def setupKeys(orDict):
     orDict.clear()
     # Number of lines read for a
     # specific Chromosome
-    orDict["nrOfLines"] = 0
+    orDict["startPosition"] = 0
+    orDict["endPosition"] = 0
+    orDict["typeNotZero"] = 0
 
     # State variables
     # states A(011), B(101), C(110)
@@ -171,9 +175,12 @@ def main():
         count = 0
 
         for row in reader:
-            orDict["nrOfLines"] += 1
+            if count == 0:
+                # For each new slice, save the start position
+                orDict["startPosition"] = row["Position"]
             count += 1
             if row["Chromosome"] != currentChromosome or count == windowSlice:
+                orDict["endPosition"] = row["Position"]
                 outputToFile(currentChromosome, orDict, out)
                 setupKeys(orDict)
                 currentChromosome = row["Chromosome"]
@@ -184,6 +191,9 @@ def main():
                 currentBaboon1 = int(row[baboon1])
                 currentBaboon2 = int(row[baboon2])
                 currentBaboon3 = int(row[baboon3])
+
+                accumulateTypeNotZero(currentBaboon1, currentBaboon2,
+                                      currentBaboon2, orDict)
 
                 currentState, stateChanged = accumulateState(currentBaboon1,
                                                              currentBaboon2,
@@ -199,7 +209,7 @@ def main():
                                                        currentState, orDict)
 
         # Need to last line and final chromosome
-        orDict["nrOfLines"] += 1
+        orDict["endPosition"] = row["Position"]
         outputToFile(currentChromosome, orDict, out)
 
 
