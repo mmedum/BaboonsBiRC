@@ -26,13 +26,52 @@ def accumulatePoly(baboon1, baboon2, baboon3, values):
         values["nrOfPolyType2And3"] += 1
 
 
-def accumulateState(baboon1, baboon2, baboon3, values):
+def accumulateState(baboon1, baboon2, baboon3, currentState, values):
     if baboon1 == 0 and baboon2 == 1 and baboon3 == 1:
         values["nrOfStateA"] += 1
+        return 1, True
     elif baboon1 == 1 and baboon2 == 0 and baboon3 == 1:
         values["nrOfStateB"] += 1
+        return 2, True
     elif baboon1 == 1 and baboon2 == 1 and baboon3 == 0:
         values["nrOfStateC"] += 1
+        return 3, True
+    else:
+        return 0, False
+
+
+def accumulateStateChanged(lastState, currentState, values):
+    print("CurrentState: ", currentState)
+    print("LastState: ", lastState)
+    if lastState == 0:
+        return currentState
+    elif lastState == 1 and currentState == 1:
+        values["stateAToA"] += 1
+        return 1
+    elif lastState == 1 and currentState == 2:
+        values["stateAToB"] += 1
+        return 2
+    elif lastState == 1 and currentState == 3:
+        values["stateAToC"] += 1
+        return 3
+    elif lastState == 2 and currentState == 2:
+        values["stateBToB"] += 1
+        return 2
+    elif lastState == 2 and currentState == 1:
+        values["stateBToA"] += 1
+        return 1
+    elif lastState == 2 and currentState == 3:
+        values["stateBToC"] += 1
+        return 3
+    elif lastState == 3 and currentState == 3:
+        values["stateCToC"] += 1
+        return 3
+    elif lastState == 3 and currentState == 1:
+        values["stateCToA"] += 1
+        return 1
+    elif lastState == 3 and currentState == 2:
+        values["stateCToB"] += 1
+        return 2
 
 
 def setupKeys(orDict):
@@ -101,20 +140,26 @@ def main():
     baboon2 = args.baboons[1]
     baboon3 = args.baboons[2]
 
-    # Current Chromosome, assumming starting with 1
-    currentChromosome = "1"
-
     # Create dictionary reader
     # Perform calculations
     with open(args.filename) as patterns, open('output.txt', 'a') as out:
         reader = csv.DictReader(patterns, delimiter="\t")
-        next(reader)  # skip fieldnames
 
         # Setup ordered map for holding results
         # for each chromosome before writing
         # them to out file
         orDict = collections.OrderedDict()
         setupKeys(orDict)
+
+        # Current Chromosome, assumming starting with 1
+        currentChromosome = "1"
+
+        # No state = 0
+        # A state (011) = 1
+        # B state (101) = 2
+        # C state (110) = 3
+        lastState = 0
+        currentState = 0
 
         # Output fieldnames and tab seperate them
         out.write("Chromosome\t")
@@ -133,16 +178,25 @@ def main():
                 setupKeys(orDict)
                 currentChromosome = row["Chromosome"]
                 count = 0
+                lastState = 0
+                currentState = 0
             else:
                 currentBaboon1 = int(row[baboon1])
                 currentBaboon2 = int(row[baboon2])
                 currentBaboon3 = int(row[baboon3])
 
-                accumulateState(currentBaboon1, currentBaboon2,
-                                currentBaboon3, orDict)
+                currentState, stateChanged = accumulateState(currentBaboon1,
+                                                             currentBaboon2,
+                                                             currentBaboon3,
+                                                             currentState,
+                                                             orDict)
 
                 accumulatePoly(currentBaboon1, currentBaboon2,
                                currentBaboon3, orDict)
+
+                if stateChanged:
+                    lastState = accumulateStateChanged(lastState,
+                                                       currentState, orDict)
 
         # Need to last line and final chromosome
         orDict["nrOfLines"] += 1
