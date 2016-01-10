@@ -125,9 +125,11 @@ def outputToFile(currentChromosome, orDict, outFile):
 def main():
     # Set arguments for the program
     parser = ArgumentParser(description="Argument parser for baboons.")
-    parser.add_argument("-file", dest="filename", required=True,
+    parser.add_argument("-input", dest="input", required=True,
                         help="Input file with baboon data", metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
+    parser.add_argument("-out", dest="output", required=True,
+                        help="Where to place output file", metavar="FILE")
     parser.add_argument("-s", dest="slice", required=True,
                         help="The slice for for each Chromosome",
                         metavar="SLICE", type=int)
@@ -147,7 +149,7 @@ def main():
 
     # Create dictionary reader
     # Perform calculations
-    with open(args.filename) as patterns, open('output.txt', 'a') as out:
+    with open(args.input) as patterns, open(args.output, 'a') as out:
         reader = csv.DictReader(patterns, delimiter="\t")
 
         # Setup ordered map for holding results
