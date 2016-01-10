@@ -11,7 +11,7 @@ def is_valid_file(parser, file):
         return file
 
 
-def accumulatePoly(baboon1, baboon2, baboon3, values):
+def accumulate_poly(baboon1, baboon2, baboon3, values):
     if baboon1 == 2:
         values["nrOfPolyType1"] += 1
     if baboon2 == 2:
@@ -26,7 +26,7 @@ def accumulatePoly(baboon1, baboon2, baboon3, values):
         values["nrOfPolyType2And3"] += 1
 
 
-def accumulateState(baboon1, baboon2, baboon3, currentState, values):
+def accumulate_state(baboon1, baboon2, baboon3, currentState, values):
     if baboon1 == 0 and baboon2 == 1 and baboon3 == 1:
         values["nrOfStateA"] += 1
         return 1, True
@@ -40,12 +40,12 @@ def accumulateState(baboon1, baboon2, baboon3, currentState, values):
         return 0, False
 
 
-def accumulateTypeNotZero(baboon1, baboon2, baboon3, values):
+def accumulate_type_not_zero(baboon1, baboon2, baboon3, values):
     if baboon1 > 0 or baboon2 > 0 or baboon3 > 0:
         values["typeNotZero"] += 1
 
 
-def accumulateStateChanged(lastState, currentState, values):
+def accumulate_state_changed(lastState, currentState, values):
     if lastState == 0:
         return currentState
     if lastState == 1 and currentState == 1:
@@ -77,7 +77,7 @@ def accumulateStateChanged(lastState, currentState, values):
         return 2
 
 
-def setupKeys(orDict):
+def setup_keys(orDict):
     orDict.clear()
     # Number of lines read for a
     # specific Chromosome
@@ -111,7 +111,7 @@ def setupKeys(orDict):
     orDict["nrOfPolyType2And3"] = 0
 
 
-def outputToFile(currentChromosome, orDict, outFile):
+def output_to_file(currentChromosome, orDict, outFile):
     # Output current chromosome and data
     outFile.write("\n")
     outFile.write(str(currentChromosome))
@@ -156,7 +156,7 @@ def main():
         # for each chromosome before writing
         # them to out file
         orDict = collections.OrderedDict()
-        setupKeys(orDict)
+        setup_keys(orDict)
 
         # Current Chromosome, assumming starting with 1
         currentChromosome = "1"
@@ -184,8 +184,8 @@ def main():
             count += 1
             if row["Chromosome"] != currentChromosome or count == windowSlice:
                 orDict["endPosition"] = row["Position"]
-                outputToFile(currentChromosome, orDict, out)
-                setupKeys(orDict)
+                output_to_file(currentChromosome, orDict, out)
+                setup_keys(orDict)
                 currentChromosome = row["Chromosome"]
                 count = 0
                 lastState = 0
@@ -195,25 +195,25 @@ def main():
                 currentBaboon2 = int(row[baboon2])
                 currentBaboon3 = int(row[baboon3])
 
-                accumulateTypeNotZero(currentBaboon1, currentBaboon2,
-                                      currentBaboon2, orDict)
+                accumulate_type_not_zero(currentBaboon1, currentBaboon2,
+                                         currentBaboon2, orDict)
 
-                currentState, stateChanged = accumulateState(currentBaboon1,
-                                                             currentBaboon2,
-                                                             currentBaboon3,
-                                                             currentState,
-                                                             orDict)
+                currentState, stateChanged = accumulate_state(currentBaboon1,
+                                                              currentBaboon2,
+                                                              currentBaboon3,
+                                                              currentState,
+                                                              orDict)
 
-                accumulatePoly(currentBaboon1, currentBaboon2,
-                               currentBaboon3, orDict)
+                accumulate_poly(currentBaboon1, currentBaboon2,
+                                currentBaboon3, orDict)
 
                 if stateChanged:
-                    lastState = accumulateStateChanged(lastState,
-                                                       currentState, orDict)
+                    lastState = accumulate_state_changed(lastState,
+                                                         currentState, orDict)
 
-        # Need to last line and final chromosome
+        # Need to last lines endPosition and out for the final chromosome
         orDict["endPosition"] = row["Position"]
-        outputToFile(currentChromosome, orDict, out)
+        output_to_file(currentChromosome, orDict, out)
 
 
 if __name__ == "__main__":

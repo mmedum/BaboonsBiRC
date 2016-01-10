@@ -1,0 +1,4 @@
+Chromosome	Position	ref	alt	rheMac2	cynocephalus_genotypes	papio_genotypes	ursinus_genotypes	anubis_genotypes	kindae_genotypes	hamadryas_genotypes
+1	1033	A	C	A	0	1	1	0	2	0
+1	1111	G	A	G	1	0	1	2	0	0
+
