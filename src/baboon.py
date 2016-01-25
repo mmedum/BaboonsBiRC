@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import os.path
 import csv
 import collections
+import random
 
 
 def is_valid_file(parser, file):
@@ -11,18 +12,18 @@ def is_valid_file(parser, file):
         return file
 
 
-def accumulate_poly(baboon1, baboon2, baboon3, values):
-    if baboon1 == 2:
+def accumulate_poly(baboon1, baboon2, baboon3, checkValue, values):
+    if baboon1 == checkValue:
         values["nrOfPolyType1"] += 1
-    if baboon2 == 2:
+    if baboon2 == checkValue:
         values["nrOfPolyType2"] += 1
-    if baboon3 == 2:
+    if baboon3 == checkValue:
         values["nrOfPolyType3"] += 1
-    if baboon1 == 2 and baboon2 == 2:
+    if baboon1 == checkValue and baboon2 == checkValue:
         values["nrOfPolyType1And2"] += 1
-    if baboon1 == 2 and baboon3 == 2:
+    if baboon1 == checkValue and baboon3 == checkValue:
         values["nrOfPolyType1And3"] += 1
-    if baboon2 == 2 and baboon3 == 2:
+    if baboon2 == checkValue and baboon3 == checkValue:
         values["nrOfPolyType2And3"] += 1
 
 
@@ -77,6 +78,13 @@ def accumulate_state_changed(lastState, currentState, values):
         return 2
 
 
+def reencode(baboon):
+    if baboon == 1:
+        return random.randint(0, 1)
+    if baboon == 2:
+        return 1
+
+
 def setup_keys(orDict):
     orDict.clear()
     # Number of lines read for a
@@ -123,6 +131,8 @@ def output_to_file(currentChromosome, orDict, outFile):
 
 
 def main():
+    # Seed the random generator
+    random.seed(None)
     # Set arguments for the program
     parser = ArgumentParser(description="Argument parser for baboons.")
     parser.add_argument("-input", dest="input", required=True,
@@ -136,11 +146,19 @@ def main():
     parser.add_argument("-b", dest="baboons", required=True, nargs=3,
                         help="Input selected baboon species",
                         metavar="BABOON", type=str)
+    parser.add_argument("-reencode", dest="reencode", required=True,
+                        help="Input if file should be reencoded before use",
+                        metavar="FILE", type=bool)
     # Parse the arguments
     args = parser.parse_args()
 
     # Slice
     windowSlice = args.slice
+
+    # Reencode
+    # Set standard polymorphic check value
+    shouldReencode = args.reencode
+    poly_checkvalue = 1 if shouldReencode else 2
 
     # Save the three input species
     baboon1 = args.baboons[0]
@@ -195,6 +213,14 @@ def main():
                 currentBaboon2 = int(row[baboon2])
                 currentBaboon3 = int(row[baboon3])
 
+                accumulate_poly(currentBaboon1, currentBaboon2,
+                                currentBaboon3, poly_checkvalue, orDict)
+
+                if(shouldReencode):
+                    currentBaboon1 = reencode(currentBaboon1)
+                    currentBaboon2 = reencode(currentBaboon2)
+                    currentBaboon3 = reencode(currentBaboon3)
+
                 accumulate_type_not_zero(currentBaboon1, currentBaboon2,
                                          currentBaboon2, orDict)
 
@@ -203,9 +229,6 @@ def main():
                                                               currentBaboon3,
                                                               currentState,
                                                               orDict)
-
-                accumulate_poly(currentBaboon1, currentBaboon2,
-                                currentBaboon3, orDict)
 
                 if stateChanged:
                     lastState = accumulate_state_changed(lastState,
