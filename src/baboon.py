@@ -79,6 +79,8 @@ def accumulate_state_changed(lastState, currentState, values):
 
 
 def reencode(baboon):
+    if baboon == 0:
+        return 0
     if baboon == 1:
         return random.randint(0, 1)
     if baboon == 2:
@@ -146,9 +148,8 @@ def main():
     parser.add_argument("-b", dest="baboons", required=True, nargs=3,
                         help="Input selected baboon species",
                         metavar="BABOON", type=str)
-    parser.add_argument("-reencode", dest="reencode", required=True,
-                        help="Input if file should be reencoded before use",
-                        metavar="FILE", type=bool)
+    parser.add_argument("-reencode", action="store_true",
+                        help="Input if file should be reencoded before use")
     # Parse the arguments
     args = parser.parse_args()
 
@@ -199,7 +200,7 @@ def main():
             if count == 0:
                 # For each new slice, save the start position
                 orDict["startPosition"] = row["Position"]
-            count += 1
+                count += 1
             if row["Chromosome"] != currentChromosome or count == windowSlice:
                 orDict["endPosition"] = row["Position"]
                 output_to_file(currentChromosome, orDict, out)

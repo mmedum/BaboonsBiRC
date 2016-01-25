@@ -1,0 +1,10 @@
+Chromosome	Position	ref	alt	rheMac2	cyn	pap	urs	anu	kin	ham
+1	1033	A	C	A	0	0	0	0	1	0
+1	1111	G	A	G	0	0	0	0	0	0
+1	1127	G	C	C	0	2	1	2	0	2
+1	1358	A	G	A	0	0	0	0	1	0
+1	1425	A	G	A	0	0	0	0	1	0
+1	1437	G	A	G	1	0	2	0	1	0
+1	1445	G	C	G	1	0	2	0	1	0
+1	1452	G	A	G	0	0	0	1	0	2
+1	1461	G	A	G	0	0	0	0	1	0
