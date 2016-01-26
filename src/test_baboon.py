@@ -64,7 +64,7 @@ class BaboonsTest(unittest.TestCase):
         self.assertEqual(self.orDict["nrOfPolyType2And3"], 1)
 
     def test_should_return_either_zero_or_one(self):
-        self.assertTrue(baboon.reencode(1)) in list(range(2))
+        self.assertTrue((baboon.reencode(1)) in list(range(2)))
 
     def test_type_not_zero_for_baboon1(self):
         self.assertEqual(self.orDict["typeNotZero"], 0)

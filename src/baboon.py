@@ -193,22 +193,22 @@ def main():
             out.write(key)
             out.write("\t")
 
-        # count variable to check for window slice
-        count = 0
+        shouldSetStartPosition = True
+        startPosition = -1
 
         for row in reader:
-            if count == 0:
-                # For each new slice, save the start position
-                orDict["startPosition"] = row["Position"]
-                count += 1
-            if row["Chromosome"] != currentChromosome or count == windowSlice:
+            if shouldSetStartPosition:
+                startPosition = int(row["Position"])
+                orDict["startPosition"] = startPosition
+                shouldSetStartPosition = False
+            if row["Chromosome"] != currentChromosome or (int(row["Position"]) - startPosition) >= windowSlice:
                 orDict["endPosition"] = row["Position"]
                 output_to_file(currentChromosome, orDict, out)
                 setup_keys(orDict)
                 currentChromosome = row["Chromosome"]
-                count = 0
                 lastState = 0
                 currentState = 0
+                shouldSetStartPosition = True
             else:
                 currentBaboon1 = int(row[baboon1])
                 currentBaboon2 = int(row[baboon2])
@@ -235,9 +235,10 @@ def main():
                     lastState = accumulate_state_changed(lastState,
                                                          currentState, orDict)
 
-        # Need to last lines endPosition and out for the final chromosome
-        orDict["endPosition"] = row["Position"]
-        output_to_file(currentChromosome, orDict, out)
+        # If shouldSetStartPosition is true, we are done with the file
+        if not shouldSetStartPosition:
+            orDict["endPosition"] = row["Position"]
+            output_to_file(currentChromosome, orDict, out)
 
 
 if __name__ == "__main__":
