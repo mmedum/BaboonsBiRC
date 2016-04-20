@@ -208,32 +208,32 @@ def main():
                 currentChromosome = row["Chromosome"]
                 lastState = 0
                 currentState = 0
-                shouldSetStartPosition = True
-            else:
-                currentBaboon1 = int(row[baboon1])
-                currentBaboon2 = int(row[baboon2])
-                currentBaboon3 = int(row[baboon3])
+                orDict["startPosition"] = row["Position"]
 
-                accumulate_poly(currentBaboon1, currentBaboon2,
-                                currentBaboon3, poly_checkvalue, orDict)
+            currentBaboon1 = int(row[baboon1])
+            currentBaboon2 = int(row[baboon2])
+            currentBaboon3 = int(row[baboon3])
 
-                if(shouldReencode):
-                    currentBaboon1 = reencode(currentBaboon1)
-                    currentBaboon2 = reencode(currentBaboon2)
-                    currentBaboon3 = reencode(currentBaboon3)
+            accumulate_poly(currentBaboon1, currentBaboon2,
+                            currentBaboon3, poly_checkvalue, orDict)
 
-                accumulate_type_not_zero(currentBaboon1, currentBaboon2,
-                                         currentBaboon2, orDict)
+            if(shouldReencode):
+                currentBaboon1 = reencode(currentBaboon1)
+                currentBaboon2 = reencode(currentBaboon2)
+                currentBaboon3 = reencode(currentBaboon3)
 
-                currentState, stateChanged = accumulate_state(currentBaboon1,
-                                                              currentBaboon2,
-                                                              currentBaboon3,
-                                                              currentState,
-                                                              orDict)
+            accumulate_type_not_zero(currentBaboon1, currentBaboon2,
+                                     currentBaboon2, orDict)
 
-                if stateChanged:
-                    lastState = accumulate_state_changed(lastState,
-                                                         currentState, orDict)
+            currentState, stateChanged = accumulate_state(currentBaboon1,
+                                                          currentBaboon2,
+                                                          currentBaboon3,
+                                                          currentState,
+                                                          orDict)
+
+            if stateChanged:
+                lastState = accumulate_state_changed(lastState,
+                                                     currentState, orDict)
 
         # If shouldSetStartPosition is true, we are done with the file
         if not shouldSetStartPosition:
